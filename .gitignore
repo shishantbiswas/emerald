@@ -1,0 +1,4 @@
+build
+*.o
+qbe/qbe-1.2
+qbe/qbe-1.2.tar.xz

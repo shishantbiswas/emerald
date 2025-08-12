@@ -35,11 +35,13 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    Token* tokens = tokenize(file_data);
+    int token_count = 0;
+    Token* tokens = tokenize(file_data, &token_count);
     if (tokens != NULL) {
         print_tokens(tokens);
         free_tokens(tokens);
     };
+    printf("Token count: %d\n", token_count);
 
     free(file_data);
     fclose(fp);

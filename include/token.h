@@ -11,7 +11,16 @@ typedef enum {
     TOKEN_IDENTIFIER,
     TOKEN_KEYWORD,
     TOKEN_OPERATOR,
-    TOKEN_PUNCTUATION,
+    TOKEN_RIGHT_PAREN,
+    TOKEN_LEFT_PAREN,
+    TOKEN_RIGHT_BRACE,
+    TOKEN_LEFT_BRACE,
+    TOKEN_SEMICOLON,
+    TOKEN_COLON,
+    TOKEN_COMMA,
+    TOKEN_DOT,
+    TOKEN_QUESTION,
+    TOKEN_EXCLAMATION,
     TOKEN_COMMENT,
     TOKEN_WHITESPACE,
 } Token_Type;
@@ -25,7 +34,7 @@ typedef struct Token {
 } Token;
 
 // Tokenizer functions
-Token* tokenize(const char* input);
+Token* tokenize(const char* input, int* token_count);
 void free_tokens(Token* tokens);
 void print_tokens(const Token* tokens);
 

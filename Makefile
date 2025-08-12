@@ -12,7 +12,6 @@ $(OUT): $(OBJ)
 	$(CC) -O -o $(OUT) $(OBJ) $(LDFLAGS)
 
 build/%.o: src/%.c
-	mkdir -p build
 	$(CC) -c $(CFLAGS) $< -o $@
 
 # Static build target
