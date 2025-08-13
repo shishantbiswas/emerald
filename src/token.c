@@ -85,7 +85,29 @@ Token* tokenize(const char* input, int* token_count) {
         }
         // Handle punctuation
         else if (is_punctuation(input[i])) {
-            tokens[token_index].type = TOKEN_LEFT_BRACE;
+            if (input[i] == '(') {
+                tokens[token_index].type = TOKEN_LEFT_PAREN;
+            } else if (input[i] == ')') {
+                tokens[token_index].type = TOKEN_RIGHT_PAREN;
+            } else if (input[i] == '{') {
+                tokens[token_index].type = TOKEN_LEFT_BRACE;
+            } else if (input[i] == '}') {
+                tokens[token_index].type = TOKEN_RIGHT_BRACE;
+            } else if (input[i] == ';') {
+                tokens[token_index].type = TOKEN_SEMICOLON;
+            } else if (input[i] == ',') {
+                tokens[token_index].type = TOKEN_COMMA;
+            } else if (input[i] == '.') {
+                tokens[token_index].type = TOKEN_DOT;
+            } else if (input[i] == ':') {
+                tokens[token_index].type = TOKEN_COLON;
+            } else if (input[i] == '?') {
+                tokens[token_index].type = TOKEN_QUESTION;
+            } else if (input[i] == '!') {
+                tokens[token_index].type = TOKEN_EXCLAMATION;
+            } else if (input[i] == '~') {
+                tokens[token_index].type = TOKEN_TILDE;
+            }
             tokens[token_index].value = strndup(input + i, 1);
             tokens[token_index].length = 1;
             i++;

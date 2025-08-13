@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Iinclude -g -std=c11 -Wall -Wextra -Werror -D_GNU_SOURCE
+CFLAGS = -Iinclude -g -std=c11 -Wall -Wextra -Werror -D_GNU_SOURCE -pedantic 
 LDFLAGS = 
 SRC = src/main.c src/token.c src/ast.c src/ir.c
 OBJ = $(SRC:src/%.c=build/%.o)

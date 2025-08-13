@@ -4,25 +4,28 @@
 #include <stddef.h>
 
 typedef enum {
-    TOKEN_EOF,
-    TOKEN_INT,
-    TOKEN_FLOAT,
-    TOKEN_STRING,
-    TOKEN_IDENTIFIER,
-    TOKEN_KEYWORD,
-    TOKEN_OPERATOR,
-    TOKEN_RIGHT_PAREN,
-    TOKEN_LEFT_PAREN,
-    TOKEN_RIGHT_BRACE,
-    TOKEN_LEFT_BRACE,
-    TOKEN_SEMICOLON,
-    TOKEN_COLON,
-    TOKEN_COMMA,
-    TOKEN_DOT,
-    TOKEN_QUESTION,
-    TOKEN_EXCLAMATION,
-    TOKEN_COMMENT,
-    TOKEN_WHITESPACE,
+    TOKEN_EOF, // End of file
+    TOKEN_INT, // Integer 1-9
+    TOKEN_FLOAT, // Float 1.0
+    TOKEN_STRING, // String "Hello, World!"
+    TOKEN_IDENTIFIER, // Identifier my_var
+    TOKEN_KEYWORD, // Keyword let, if, else, while, return, print
+    TOKEN_OPERATOR, // Operator operator
+    TOKEN_RIGHT_PAREN, // Right (
+    TOKEN_LEFT_PAREN, // Left (
+    TOKEN_RIGHT_BRACE, // Right {
+    TOKEN_LEFT_BRACE, // Left {
+    TOKEN_RIGHT_SQUARE, // Right [
+    TOKEN_LEFT_SQUARE, // Left [
+    TOKEN_SEMICOLON, // ;
+    TOKEN_TILDE, // ~
+    TOKEN_COLON, // :
+    TOKEN_COMMA, // ,
+    TOKEN_DOT, // .
+    TOKEN_QUESTION, // ?
+    TOKEN_EXCLAMATION, // !
+    TOKEN_COMMENT, // #
+    TOKEN_WHITESPACE, // 
 } Token_Type;
 
 typedef struct Token {
