@@ -9,7 +9,14 @@ typedef enum {
     TOKEN_FLOAT, // Float 1.0
     TOKEN_STRING, // String "Hello, World!"
     TOKEN_IDENTIFIER, // Identifier my_var
-    TOKEN_KEYWORD, // Keyword let, if, else, while, return, print
+    TOKEN_PRINT,    // Keyword print
+    TOKEN_IF,       // Keyword if
+    TOKEN_ELSE,     // Keyword else
+    TOKEN_LOOP,     // Keyword loop
+    TOKEN_FOREACH,  // Keyword foreach
+    TOKEN_WHILE,    // Keyword while
+    TOKEN_RETURN,   // Keyword return
+    TOKEN_LET,      // Keyword let
     TOKEN_OPERATOR, // Operator operator
     TOKEN_RIGHT_PAREN, // Right (
     TOKEN_LEFT_PAREN, // Left (
@@ -19,6 +26,7 @@ typedef enum {
     TOKEN_LEFT_SQUARE, // Left [
     TOKEN_SEMICOLON, // ;
     TOKEN_TILDE, // ~
+    TOKEN_ASSIGN, // =
     TOKEN_COLON, // :
     TOKEN_COMMA, // ,
     TOKEN_DOT, // .
@@ -40,5 +48,6 @@ typedef struct Token {
 Token* tokenize(const char* input, int* token_count);
 void free_tokens(Token* tokens);
 void print_tokens(const Token* tokens);
+char* token_type_to_string(Token_Type type);
 
 #endif // TOKEN_H

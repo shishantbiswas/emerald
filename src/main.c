@@ -10,23 +10,27 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     char *filename = argv[1];
-    
+
+    // Open file
     FILE *fp = fopen(filename, "r");
     if(fp == NULL) {
         printf("Error: Could not open file %s\n", filename);
         return 1;
     }
-
+    // Get file size
     fseek(fp, 0, SEEK_END);
     long file_size = ftell(fp);
     rewind(fp);
 
+    // Allocate memory for file data
     char *file_data = malloc(file_size);
     if(file_data == NULL) {
         printf("Error: Could not allocate memory for file data\n");
         fclose(fp);
         return 1;
     }
+
+    // Read file
     size_t result = fread(file_data, file_size, 1, fp);
     if(result != 1) {
         printf("Error: Could not read file\n");
@@ -34,15 +38,26 @@ int main(int argc, char *argv[]) {
         fclose(fp);
         return 1;
     }
-
+    
+    // Tokenize
     int token_count = 0;
     Token* tokens = tokenize(file_data, &token_count);
+    // print_tokens(tokens);
+    // printf("Token count: %d\n", token_count);
+    
+    // Parse
+    int ast_count = 0;
+    ASTNode* ast = make_ast_program(tokens, token_count, &ast_count);
+    print_ast(ast);
+    printf("AST count: %d\n", ast_count);
+    
+    // Free memory
+    if (ast != NULL) {
+        free_ast(ast);
+    }
     if (tokens != NULL) {
-        print_tokens(tokens);
         free_tokens(tokens);
     };
-    printf("Token count: %d\n", token_count);
-
     free(file_data);
     fclose(fp);
     return 0;

@@ -50,7 +50,7 @@ Token* tokenize(const char* input, int* token_count) {
             
             // Check if it's a keyword
             if (strncmp(tokens[token_index].value, "print", 5) == 0) {
-                tokens[token_index].type = TOKEN_KEYWORD;
+                tokens[token_index].type = TOKEN_PRINT;
             }
         }
         // Handle strings
@@ -176,14 +176,14 @@ int is_punctuation(char c) {
 }
 
 // Helper function to print token type as string
-const char* token_type_to_string(Token_Type type) {
+char* token_type_to_string(Token_Type type) {
     switch (type) {
         case TOKEN_EOF: return "EOF";
         case TOKEN_INT: return "INT";
         case TOKEN_FLOAT: return "FLOAT";
         case TOKEN_STRING: return "STRING";
         case TOKEN_IDENTIFIER: return "IDENTIFIER";
-        case TOKEN_KEYWORD: return "KEYWORD";
+        case TOKEN_PRINT: return "PRINT";
         case TOKEN_OPERATOR: return "OPERATOR";
         case TOKEN_RIGHT_PAREN: return "RIGHT_PAREN";
         case TOKEN_LEFT_PAREN: return "LEFT_PAREN";
