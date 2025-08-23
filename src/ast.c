@@ -38,7 +38,14 @@ void print_ast(ASTNode* node) {
     switch (node->type) {
         case AST_PROGRAM:
             printf("PROGRAM (\n");
-            break;
+            ASTNode* current = node->left;
+            while(current != NULL) {
+                printf("  ");
+                print_ast(current);
+                current = current->right;
+            }
+            printf(")\n");
+            return;
             
         case AST_PRINT:
             printf("PRINT (");
