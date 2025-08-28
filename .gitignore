@@ -3,3 +3,6 @@ build
 qbe/qbe-1.2
 qbe/qbe-1.2.tar.xz
 plan.md
+out
+out.s
+build/*

@@ -1,0 +1,14 @@
+data $fmtint = { b "%d\n", b 0 }
+
+export function w $main() {
+@start
+        %x =w copy 0
+@loop
+        %fmt =l copy $fmtint
+        call $printf(l %fmt, w %x)
+        %x =w add %x, 1
+        %cond =w csltw %x, 100
+        jnz %cond, @loop, @end
+@end
+        ret 0
+}
