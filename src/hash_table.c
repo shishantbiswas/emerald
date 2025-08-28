@@ -1,10 +1,20 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "../include/hash_table.h"
+#include "hash_table.h"
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
 
-// Internal hash function
-static int hash(int key, int size) {
-    return key % size;
+// djb2 hash function by Dan Bernstein
+int hash(const char *str) {
+    int h = 5381;
+    int c;
+
+    while ((c = *str++)) {
+        h = ((h << 5) + h) + c;
+    }
+
+    return h;
 }
 
 // Function to create a new hashtable
@@ -30,12 +40,14 @@ Hashtable* createHashtable(int size) {
 }
 
 // Function to insert a key-value pair into the hashtable
-void insertEntry(Hashtable* hashtable, int key, int value) {
-    if (hashtable == NULL || hashtable->table == NULL) {
-        return;  // Invalid hashtable
+void insertEntry(Hashtable* hashtable, char* data) {
+    if (hashtable == NULL || hashtable->table == NULL || data == NULL) {
+        return;  // Invalid parameters
     }
 
-    int index = hash(key, hashtable->size);
+    // Calculate hash and ensure it's within table bounds
+    unsigned int h = hash(data);
+    int index = h % hashtable->size;
     
     // Create new entry
     Entry* newEntry = (Entry*)malloc(sizeof(Entry));
@@ -43,42 +55,51 @@ void insertEntry(Hashtable* hashtable, int key, int value) {
         return;  // Memory allocation failed
     }
     
-    newEntry->key = key;
-    newEntry->value = value;
+    newEntry->data = strdup(data);  // Make a copy of the string
+    if (newEntry->data == NULL) {
+        free(newEntry);
+        return;  // Failed to duplicate string
+    }
+    
     newEntry->next = hashtable->table[index];
     hashtable->table[index] = newEntry;
 }
 
 // Function to search for a value by key in the hashtable
-int searchEntry(Hashtable* hashtable, int key) {
-    if (hashtable == NULL || hashtable->table == NULL) {
-        return -1;  // Invalid hashtable or not found
+char* searchEntry(Hashtable* hashtable, char* data) {
+    if (hashtable == NULL || hashtable->table == NULL || data == NULL) {
+        return NULL;  // Invalid parameters
     }
 
-    int index = hash(key, hashtable->size);
+    unsigned int h = hash(data);
+    int index = h % hashtable->size;
     Entry* current = hashtable->table[index];
     
     while (current != NULL) {
-        if (current->key == key) {
-            return current->value;
+        if (strcmp(current->data, data) == 0) {
+            return current->data;
         }
         current = current->next;
     }
     
-    return -1; // Not found
+    return NULL; // Not found
 }
 
 // Function to delete an entry from the hashtable
-void deleteEntry(Hashtable* hashtable, int key) {
-    if (hashtable == NULL || hashtable->table == NULL) {
-        return;  // Invalid hashtable
+void deleteEntry(Hashtable* hashtable, char* data) {
+    if (hashtable == NULL || hashtable->table == NULL || data == NULL) {
+        return;  // Invalid parameters
     }
 
-    int index = hash(key, hashtable->size);
+    unsigned int h = hash(data);
+    int index = h % hashtable->size;
     Entry* current = hashtable->table[index];
     Entry* prev = NULL;
     
-    while (current != NULL && current->key != key) {
+    while (current != NULL) {
+        if (strcmp(current->data, data) == 0) {
+            break;
+        }
         prev = current;
         current = current->next;
     }
@@ -95,6 +116,10 @@ void deleteEntry(Hashtable* hashtable, int key) {
         prev->next = current->next;
     }
     
+    // Free the duplicated string and the entry
+    if (current->data != NULL) {
+        free(current->data);
+    }
     free(current);
 }
 
@@ -105,17 +130,24 @@ void freeHashtable(Hashtable* hashtable) {
     }
     
     if (hashtable->table != NULL) {
-        // Free all entries in the table
+        // Free all entries
         for (int i = 0; i < hashtable->size; i++) {
             Entry* current = hashtable->table[i];
             while (current != NULL) {
                 Entry* temp = current;
                 current = current->next;
+                if (temp->data != NULL) {
+                    free(temp->data);  // Free the duplicated string
+                }
                 free(temp);
             }
         }
+        
+        // Free the table
         free(hashtable->table);
+        hashtable->table = NULL;
     }
     
+    // Free the hashtable structure
     free(hashtable);
 }

@@ -3,8 +3,7 @@
 
 // Hashtable Entry
 typedef struct Entry {
-    int key;
-    int value;
+    char* data;
     struct Entry* next;
 } Entry;
 
@@ -16,12 +15,12 @@ typedef struct Hashtable {
 
 // Function declarations
 Hashtable* createHashtable(int size);
-void insertEntry(Hashtable* hashtable, int key, int value);
-int searchEntry(Hashtable* hashtable, int key);
-void deleteEntry(Hashtable* hashtable, int key);
+void insertEntry(Hashtable* hashtable, char* data);
+char* searchEntry(Hashtable* hashtable, char* data);
+void deleteEntry(Hashtable* hashtable, char* data);
 void freeHashtable(Hashtable* hashtable);
 
 // Internal helper function (only used within hash_table.c)
-static int hash(int key, int size);
+int hash(const char *str);
 
 #endif // HASH_TABLE_H

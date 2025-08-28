@@ -42,22 +42,36 @@ int main(int argc, char *argv[]) {
     // Tokenize
     int token_count = 0;
     Token* tokens = tokenize(file_data, &token_count);
-    // print_tokens(tokens);
-    // printf("Token count: %d\n", token_count);
+    #ifdef DEBUG
+    print_tokens(tokens);
+    printf("Token count: %d\n", token_count);
+    #endif
     
     // Parse
     int ast_count = 0;
     ASTNode* ast = make_ast_program(tokens, token_count, &ast_count);
+    
+    // Debug output
+    #ifdef DEBUG
     print_ast(ast);
     printf("AST count: %d\n", ast_count);
+    #endif
+
+    // Make IR
+    int ir_success = make_ir(ast);
+    if(ir_success != 0) {
+        printf("Error: Could not make IR\n");
+    }
     
     // Free memory
     if (ast != NULL) {
         free_ast(ast);
     }
+
     if (tokens != NULL) {
         free_tokens(tokens);
     };
+
     free(file_data);
     fclose(fp);
     return 0;

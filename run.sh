@@ -1,1 +1,1 @@
-qbe -o out.s file.ssa && cc out.s
+~/bin/qbe -o out.s build/ir.ssa && cc out.s -o out && ./out
