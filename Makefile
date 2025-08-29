@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Iinclude -g -O3 -std=c11 -Wall -Wextra -Werror -D_GNU_SOURCE 
 LDFLAGS = 
-SRC = src/main.c src/token.c src/ast.c src/ir.c src/hash_table.c src/linked_list.c
+SRC = src/main.c src/token.c src/ast.c src/ir.c src/hash_table.c src/linked_list.c src/arena.c
 OBJ = $(SRC:src/%.c=build/%.o)
 OUT = build/main
 

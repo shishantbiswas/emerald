@@ -48,25 +48,29 @@ int main(int argc, char *argv[]) {
     #endif
     
     // Parse
-    // int ast_count = 0;
-    // ASTNode* ast = make_ast_program(tokens, token_count, &ast_count);
+    int ast_count = 0;
+    ASTNode* ast = make_ast_program(tokens, token_count, &ast_count);
     
-    // // Debug output
-    // #ifdef DEBUG
-    // print_ast(ast);
-    // printf("AST count: %d\n", ast_count);
-    // #endif
+    // Debug output
+    #ifdef DEBUG
+    if (ast == NULL) {
+        printf("Error: Failed to create AST\n");
+    } else {
+        print_ast(ast);
+        printf("AST count: %d\n", ast_count);
+    }
+    #endif
 
-    // // Make IR
-    // int ir_success = make_ir(ast);
-    // if(ir_success != 0) {
-    //     printf("Error: Could not make IR\n");
-    // }
+    // Make IR
+    int ir_success = make_ir(ast);
+    if(ir_success != 0) {
+        printf("Error: Could not make IR\n");
+    }
     
-    // // Free memory
-    // if (ast != NULL) {
-    //     free_ast(ast);
-    // }
+    // Free memory
+    if (ast != NULL) {
+        free_ast(ast);
+    }
 
     if (tokens != NULL) {
         free_tokens(tokens);

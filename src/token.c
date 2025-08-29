@@ -49,9 +49,29 @@ Token* tokenize(const char* input, int* token_count) {
             tokens[token_index].length = length;
             
             // Check if it's a keyword
-            if (strncmp(tokens[token_index].value, "print", 5) == 0) {
+            if (strcmp(tokens[token_index].value, "print") == 0) {
                 tokens[token_index].type = TOKEN_PRINT;
-            }
+            } else if (strcmp(tokens[token_index].value, "if") == 0) {
+                tokens[token_index].type = TOKEN_IF;
+            } else if (strcmp(tokens[token_index].value, "else") == 0) {
+                tokens[token_index].type = TOKEN_ELSE;
+            } else if (strcmp(tokens[token_index].value, "foreach") == 0) {
+                tokens[token_index].type = TOKEN_FOREACH;
+            } else if (strcmp(tokens[token_index].value, "for") == 0) {
+                tokens[token_index].type = TOKEN_FOR;
+            } else if (strcmp(tokens[token_index].value, "while") == 0) {
+                tokens[token_index].type = TOKEN_WHILE;
+            }else if (strcmp(tokens[token_index].value, "let") == 0) {
+                tokens[token_index].type = TOKEN_LET;
+            } else if (strcmp(tokens[token_index].value, "mut") == 0) {
+                tokens[token_index].type = TOKEN_MUT;
+            } else if (strcmp(tokens[token_index].value, "const") == 0) {
+                tokens[token_index].type = TOKEN_CONST;
+            } else if (strcmp(tokens[token_index].value, "function") == 0) {
+                tokens[token_index].type = TOKEN_FUNCTION;
+            } else if (strcmp(tokens[token_index].value, "return") == 0) {
+                tokens[token_index].type = TOKEN_RETURN;
+            } 
         }
         // Handle strings
         else if (input[i] == '"') {
@@ -84,7 +104,7 @@ Token* tokenize(const char* input, int* token_count) {
                 column++;
             }
             int length = i - start;
-            tokens[token_index].type = TOKEN_INT;
+            tokens[token_index].type = TOKEN_NUMBER;
             tokens[token_index].value = strndup(input + start, length);
             tokens[token_index].length = length;
             i++;
@@ -195,11 +215,17 @@ int is_punctuation(char c) {
 char* token_type_to_string(Token_Type type) {
     switch (type) {
         case TOKEN_EOF:         return "EOF";
-        case TOKEN_INT:         return "INT";
-        case TOKEN_FLOAT:       return "FLOAT";
+        case TOKEN_NUMBER:      return "NUMBER";
         case TOKEN_STRING:      return "STRING";
         case TOKEN_IDENTIFIER:  return "IDENTIFIER";
         case TOKEN_PRINT:       return "PRINT";
+        case TOKEN_IF:          return "IF";
+        case TOKEN_ELSE:        return "ELSE";
+        case TOKEN_FOREACH:     return "FOREACH";
+        case TOKEN_FOR:         return "FOR";
+        case TOKEN_WHILE:       return "WHILE";
+        case TOKEN_RETURN:      return "RETURN";
+        case TOKEN_LET:         return "LET";
         case TOKEN_OPERATOR:    return "OPERATOR";
         case TOKEN_RIGHT_PAREN: return "RIGHT_PAREN";
         case TOKEN_LEFT_PAREN:  return "LEFT_PAREN";

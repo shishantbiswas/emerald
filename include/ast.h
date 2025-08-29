@@ -17,6 +17,7 @@ typedef enum {
     AST_VARIABLE_DECLARATION,
     AST_IF_STATEMENT,
     AST_WHILE_LOOP,
+    AST_FOR_LOOP,
     AST_RETURN,
     AST_PRINT,
     AST_VAR,
@@ -66,6 +67,8 @@ void free_ast(ASTNode* node);
 // AST Node creation functions
 ASTNode* create_print_node(char* value);
 ASTNode* create_var_declare_node(const char* name, ASTNode* value);
+ASTNode* create_for_loop_node(ASTNode* init, ASTNode* condition, ASTNode* update, ASTNode* body);
+ASTNode* create_if_node(ASTNode* condition);
 ASTNode* create_program_node(ASTNode** statements, int statement_count);
 
 // Parsing functions
