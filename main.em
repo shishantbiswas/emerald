@@ -1,2 +1,3 @@
-print("Hello, from emerald!");
-print("it's alive");
+for (int i = 0; i < 10; i++) {
+    print("Hello, from emerald!");
+}
