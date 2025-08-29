@@ -75,6 +75,22 @@ Token* tokenize(const char* input, int* token_count) {
                 return NULL;
             }
         }
+        
+        // Handle int
+        else if (isdigit(input[i])) {
+            int start = i;
+            while (isdigit(input[i])) {
+                i++;
+                column++;
+            }
+            int length = i - start;
+            tokens[token_index].type = TOKEN_INT;
+            tokens[token_index].value = strndup(input + start, length);
+            tokens[token_index].length = length;
+            i++;
+            column++;
+        }
+
         // Handle operators
         else if (is_operator(input[i])) {
             tokens[token_index].type = TOKEN_OPERATOR;
@@ -178,26 +194,26 @@ int is_punctuation(char c) {
 // Helper function to print token type as string
 char* token_type_to_string(Token_Type type) {
     switch (type) {
-        case TOKEN_EOF: return "EOF";
-        case TOKEN_INT: return "INT";
-        case TOKEN_FLOAT: return "FLOAT";
-        case TOKEN_STRING: return "STRING";
-        case TOKEN_IDENTIFIER: return "IDENTIFIER";
-        case TOKEN_PRINT: return "PRINT";
-        case TOKEN_OPERATOR: return "OPERATOR";
+        case TOKEN_EOF:         return "EOF";
+        case TOKEN_INT:         return "INT";
+        case TOKEN_FLOAT:       return "FLOAT";
+        case TOKEN_STRING:      return "STRING";
+        case TOKEN_IDENTIFIER:  return "IDENTIFIER";
+        case TOKEN_PRINT:       return "PRINT";
+        case TOKEN_OPERATOR:    return "OPERATOR";
         case TOKEN_RIGHT_PAREN: return "RIGHT_PAREN";
-        case TOKEN_LEFT_PAREN: return "LEFT_PAREN";
+        case TOKEN_LEFT_PAREN:  return "LEFT_PAREN";
         case TOKEN_RIGHT_BRACE: return "RIGHT_BRACE";
-        case TOKEN_LEFT_BRACE: return "LEFT_BRACE";
-        case TOKEN_SEMICOLON: return "SEMICOLON";
-        case TOKEN_COLON: return "COLON";
-        case TOKEN_COMMA: return "COMMA";
-        case TOKEN_DOT: return "DOT";
-        case TOKEN_QUESTION: return "QUESTION";
+        case TOKEN_LEFT_BRACE:  return "LEFT_BRACE";
+        case TOKEN_SEMICOLON:   return "SEMICOLON";
+        case TOKEN_COLON:       return "COLON";
+        case TOKEN_COMMA:       return "COMMA";
+        case TOKEN_DOT:         return "DOT";
+        case TOKEN_QUESTION:    return "QUESTION";
         case TOKEN_EXCLAMATION: return "EXCLAMATION";
-        case TOKEN_COMMENT: return "COMMENT";
-        case TOKEN_WHITESPACE: return "WHITESPACE";
-        default: return "UNKNOWN";
+        case TOKEN_COMMENT:     return "COMMENT";
+        case TOKEN_WHITESPACE:  return "WHITESPACE";
+        default:                return "UNKNOWN";
     }
 }
 
@@ -209,20 +225,36 @@ void print_tokens(const Token* tokens) {
     }
     
     printf("Tokens:\n");
-    printf("%-15s %-15s %-10s %-10s %s\n", 
+    printf("%-20s %-20s %-10s %-10s %s\n", 
            "Type", "Value", "Line", "Column", "Length");
     printf("--------------------------------------------------\n");
     
     for (int i = 0; tokens[i].type != TOKEN_EOF; i++) {
-        const char* value = tokens[i].value ? tokens[i].value : "(null)";
-        printf("%-15s %-15s %-10d %-10d %zu\n",
+        const char* value = tokens[i].value;
+
+        char str_val[16];
+        if (tokens[i].value != NULL) {
+            size_t len = strlen(tokens[i].value);
+            if (len > 10) {
+                strncpy(str_val, tokens[i].value, 10);
+                str_val[10] = '.';
+                str_val[11] = '.';
+                str_val[12] = '.';
+                str_val[13] = '\0';
+            } else {
+                strncpy(str_val, tokens[i].value, sizeof(str_val) - 1);
+                str_val[sizeof(str_val) - 1] = '\0';
+            }
+        }
+        
+        printf("%-20s %-20s %-10d %-10d %zu\n",
                token_type_to_string(tokens[i].type),
-               value,
+               value ? str_val : "(null)",
                tokens[i].line,
                tokens[i].column,
                tokens[i].length);
     }
-    printf("%-15s %-15s %-10d %-10d %d\n",
+    printf("%-20s %-20s %-10d %-10d %d\n",
            token_type_to_string(TOKEN_EOF), 
            "(null)", 
            tokens[0].line, 
