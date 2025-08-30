@@ -46,15 +46,15 @@ int main(int argc, char *argv[]) {
     #endif
     
     // Parse
-    // ASTNode* ast = make_ast_program(tokens);
+    ASTNode* ast = make_ast_program(tokens);
     
     // Debug output
     #ifdef DEBUG
-    // if (ast == NULL) {
-    //     printf("Error: Failed to create AST\n");
-    // } else {
-    //     print_ast(ast);
-    // }
+    if (ast == NULL) {
+        printf("Error: Failed to create AST\n");
+    } else {
+        print_ast(ast);
+    }
     #endif
 
     // Make IR
@@ -64,17 +64,15 @@ int main(int argc, char *argv[]) {
     // }
     
     // Free memory
-    // if (ast != NULL) {
-    //     free_ast(ast);
-    // }
+    if (ast != NULL) {
+        free_ast(ast);
+    }
 
     if (tokens != NULL) {
         free_tokens(tokens);
     };
     
-    if(file_data != NULL) {
-        free(file_data);
-    }
+    free(file_data);
     fclose(fp);
     return 0;
 }

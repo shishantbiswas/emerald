@@ -48,24 +48,26 @@ Token* tokenize(const char* input) {
             handle_string(tokens, token_index, input, &i, &column);
         }
         
-        // Handle int
-        else if (isdigit(input[i])) {
-            int start = i;
-            while (isdigit(input[i])) {
-                i++;
-                column++;
-            }
-            int length = i - start;
-            tokens[token_index].type = TOKEN_NUMBER;
-            tokens[token_index].value = strndup(input + start, length);
-            tokens[token_index].length = length;
+    // Handle int
+    else if (isdigit(input[i])) {
+        int start = i;
+        while (isdigit(input[i])) {
             i++;
             column++;
         }
+        int length = i - start;
+        tokens[token_index].type = TOKEN_NUMBER;
+        tokens[token_index].value = strndup(input + start, length);
+        tokens[token_index].length = length;
+    }
 
         // Handle operators
         else if (is_operator(input[i])) {
-            tokens[token_index].type = TOKEN_OPERATOR;
+            if (input[i] == '=') {
+                tokens[token_index].type = TOKEN_ASSIGN;
+            } else {
+                tokens[token_index].type = TOKEN_OPERATOR;
+            }
             tokens[token_index].value = strndup(input + i, 1);
             tokens[token_index].length = 1;
             i++;
@@ -152,6 +154,7 @@ char* token_type_to_string(Token_Type type) {
         case TOKEN_WHILE:       return "WHILE";
         case TOKEN_RETURN:      return "RETURN";
         case TOKEN_LET:         return "LET";
+        case TOKEN_ASSIGN:      return "ASSIGN";
         case TOKEN_OPERATOR:    return "OPERATOR";
         case TOKEN_RIGHT_PAREN: return "RIGHT_PAREN";
         case TOKEN_LEFT_PAREN:  return "LEFT_PAREN";
@@ -239,7 +242,7 @@ void handle_identifier_and_keyword(Token* tokens, int token_index, const char* i
         tokens[token_index].type = TOKEN_FOR;
     } else if (strcmp(tokens[token_index].value, "while") == 0) {
         tokens[token_index].type = TOKEN_WHILE;
-    }else if (strcmp(tokens[token_index].value,  "let") == 0) {
+    }else if (strcmp(tokens[token_index].value, "let") == 0) {
         tokens[token_index].type = TOKEN_LET;
     } else if (strcmp(tokens[token_index].value, "mut") == 0) {
         tokens[token_index].type = TOKEN_MUT;

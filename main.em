@@ -1,1 +1,1 @@
-for { print("Hello, from emerald!"); };
+for { print("Hello, from emerald!"); }

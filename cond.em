@@ -1,1 +1,3 @@
-true
+if(true) {
+    print("Hello, World!");
+}

@@ -2,6 +2,10 @@
 #include "token.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
+
+// Function declarations
+ASTNode* parse_for_init(Token* tokens, int *pos);
 
 ASTNode* make_ast_program(Token *tokens) {
     ASTNode **statements = malloc(sizeof(ASTNode*) * 1024);
@@ -37,11 +41,9 @@ void print_ast(ASTNode* node) {
     switch (node->type) {
         case AST_PROGRAM:
             printf("PROGRAM (\n");
-            ASTNode* current = node->left;
-            while(current != NULL) {
+            if (node->left) {
                 printf("  ");
-                print_ast(current);
-                current = current->right;
+                print_ast(node->left);
             }
             printf(")\n");
             return;
@@ -70,8 +72,16 @@ void print_ast(ASTNode* node) {
                 printf("  init: ");
                 print_ast(node->left);
             }
+            // TODO: Display condition and update when we store them properly
             if (node->value.int_value == 0) {
                 printf("  condition: <infinite loop>\n");
+            } else {
+                printf("  condition: <condition exists>\n");
+            }
+            if (strcmp(node->name, "has_update") == 0) {
+                printf("  update: <update exists>\n");
+            } else {
+                printf("  update: <no update>\n");
             }
             if (node->right) {
                 printf("  body: ");
@@ -235,28 +245,108 @@ ASTNode *parse_statement(Token *tokens, int *pos) {
         }
         (*pos)++;  // Move past '{'
         
-        // Handle the if block
-        ASTNode *if_block = parse_statement(tokens, pos);
-        if (if_block == NULL) {
+        // Handle the if block - parse all statements until '}'
+        ASTNode **if_statements = malloc(sizeof(ASTNode*) * 1024);
+        if (if_statements == NULL) {
             free_ast(if_node);
             return NULL;
         }
-        if_node->right = if_block;  // Store if block as right child
-        
+        int if_count = 0;
+
+        while (tokens[*pos].type != TOKEN_RIGHT_BRACE && tokens[*pos].type != TOKEN_EOF) {
+            ASTNode *stmt = parse_statement(tokens, pos);
+            if (stmt == NULL) {
+                // Free any successfully parsed statements
+                for (int i = 0; i < if_count; i++) {
+                    free_ast(if_statements[i]);
+                }
+                free(if_statements);
+                free_ast(if_node);
+                return NULL;
+            }
+            if_statements[if_count++] = stmt;
+        }
+
         if (tokens[*pos].type != TOKEN_RIGHT_BRACE) {
             fprintf(stderr, "Expected '}' after if block at position %d\n", *pos);
+            // Free statements
+            for (int i = 0; i < if_count; i++) {
+                free_ast(if_statements[i]);
+            }
+            free(if_statements);
             free_ast(if_node);
             return NULL;
         }
         (*pos)++;  // Move past '}'
-        
+
+        // Create a program-like node for the body if multiple statements
+        ASTNode *if_block;
+        if (if_count == 1) {
+            if_block = if_statements[0];
+            free(if_statements);  // Don't free the statement itself
+        } else {
+            // Create a program node for multiple statements
+            if_block = create_program_node(if_statements, if_count);
+        }
+        if_node->right = if_block;  // Store if block as right child
+
         return if_node;
     }
 
     // Handle for loop
     if (tokens[*pos].type == TOKEN_FOR) {
         (*pos)++;  // Move past FOR
-        
+
+        // Check if this is a simple for loop without parentheses
+        if (tokens[*pos].type == TOKEN_LEFT_BRACE) {
+            // Simple for loop: for { body }
+            (*pos)++;  // Move past '{'
+
+            // Handle the for loop body - parse all statements until '}'
+            ASTNode **body_statements = malloc(sizeof(ASTNode*) * 1024);
+            if (body_statements == NULL) {
+                return NULL;
+            }
+            int body_count = 0;
+
+            while (tokens[*pos].type != TOKEN_RIGHT_BRACE && tokens[*pos].type != TOKEN_EOF) {
+                ASTNode *stmt = parse_statement(tokens, pos);
+                if (stmt == NULL) {
+                    // Free any successfully parsed statements
+                    for (int i = 0; i < body_count; i++) {
+                        free_ast(body_statements[i]);
+                    }
+                    free(body_statements);
+                    return NULL;
+                }
+                body_statements[body_count++] = stmt;
+            }
+
+            if (tokens[*pos].type != TOKEN_RIGHT_BRACE) {
+                fprintf(stderr, "Expected '}' after for body at position %d\n", *pos);
+                // Free statements
+                for (int i = 0; i < body_count; i++) {
+                    free_ast(body_statements[i]);
+                }
+                free(body_statements);
+                return NULL;
+            }
+            (*pos)++;  // Move past '}'
+
+            // Create a program-like node for the body if multiple statements
+            ASTNode *body;
+            if (body_count == 1) {
+                body = body_statements[0];
+                free(body_statements);  // Don't free the statement itself
+            } else {
+                // Create a program node for multiple statements
+                body = create_program_node(body_statements, body_count);
+            }
+
+            return create_for_loop_node(NULL, NULL, NULL, body);
+        }
+
+        // Traditional for loop with parentheses
         if (tokens[*pos].type != TOKEN_LEFT_PAREN) {
             fprintf(stderr, "Expected '(' after 'for' at position %d\n", *pos);
             return NULL;
@@ -266,11 +356,39 @@ ASTNode *parse_statement(Token *tokens, int *pos) {
         // Parse initialization (optional)
         ASTNode *init = NULL;
         if (tokens[*pos].type != TOKEN_SEMICOLON) {
-            init = parse_expression(tokens, pos);
+            if (tokens[*pos].type == TOKEN_LET) {
+                // Parse variable declaration
+                (*pos)++;  // Move past LET
+                if (tokens[*pos].type != TOKEN_IDENTIFIER) {
+                    fprintf(stderr, "Expected identifier after 'let' at position %d\n", *pos);
+                    return NULL;
+                }
+                char *name = strdup(tokens[*pos].value);
+                if (name == NULL) return NULL;
+                (*pos)++;  // Move past identifier
+                if (tokens[*pos].type != TOKEN_ASSIGN) {
+                    fprintf(stderr, "Expected '=' in variable declaration at position %d\n", *pos);
+                    free(name);
+                    return NULL;
+                }
+                (*pos)++;  // Move past '='
+                ASTNode *value = parse_expression(tokens, pos);
+                if (value == NULL) {
+                    free(name);
+                    return NULL;
+                }
+                init = create_var_declare_node(name, value);
+            } else {
+                // Parse expression
+                init = parse_expression(tokens, pos);
+            }
             if (init == NULL) {
                 return NULL;
             }
-        } else {
+        }
+
+        // Consume semicolon after init if present
+        if (tokens[*pos].type == TOKEN_SEMICOLON) {
             (*pos)++;  // Move past ';'
         }
         
@@ -283,22 +401,9 @@ ASTNode *parse_statement(Token *tokens, int *pos) {
                 return NULL;
             }
         }
-        
-        // The condition parsing should have stopped at the semicolon
-        // If we're not at a semicolon, the condition parsing consumed too much
-        if (tokens[*pos].type != TOKEN_SEMICOLON) {
-            // Check if we're past the semicolon (condition parsing consumed it)
-            // Look ahead to see if the next token is the update expression
-            if (tokens[*pos].type == TOKEN_IDENTIFIER && tokens[*pos + 1].type == TOKEN_OPERATOR) {
-                // We're at the update expression, which means the semicolon was consumed
-                // This is okay, continue to the update parsing
-            } else {
-                fprintf(stderr, "Expected ';' after for condition at position %d, got %s\n", *pos, token_type_to_string(tokens[*pos].type));
-                if (init) free_ast(init);
-                if (condition) free_ast(condition);
-                return NULL;
-            }
-        } else {
+
+        // Consume the semicolon after condition if present
+        if (tokens[*pos].type == TOKEN_SEMICOLON) {
             (*pos)++;  // Move past ';'
         }
         
@@ -312,7 +417,7 @@ ASTNode *parse_statement(Token *tokens, int *pos) {
                 return NULL;
             }
         }
-        
+
         if (tokens[*pos].type != TOKEN_RIGHT_PAREN) {
             fprintf(stderr, "Expected ')' after for update at position %d\n", *pos);
             if (init) free_ast(init);
@@ -530,9 +635,20 @@ ASTNode* create_program_node(ASTNode** statements, int statement_count) {
 }
 
 ASTNode* parse_expression(Token* tokens, int *pos) {
-    
+    // Handle boolean literals
+    if (tokens[*pos].type == TOKEN_BOOL) {
+        ASTNode* node = malloc(sizeof(ASTNode));
+        if (node == NULL) return NULL;
 
-    
+        node->type = AST_LITERAL;
+        node->left = NULL;
+        node->right = NULL;
+        node->value.int_value = strcmp(tokens[*pos].value, "true") == 0 ? 1 : 0;
+        node->value_type = VALUE_TYPE_INT;  // Store boolean as int (0 or 1)
+        (*pos)++;
+        return node;
+    }
+
     // Handle string literals
     if (tokens[*pos].type == TOKEN_STRING) {
         ASTNode* node = malloc(sizeof(ASTNode));
@@ -574,58 +690,59 @@ ASTNode* parse_expression(Token* tokens, int *pos) {
         left->value_type = VALUE_TYPE_IDENTIFIER;
         (*pos)++;
         
-        // Check for binary operator
-        if (tokens[*pos].type == TOKEN_OPERATOR) {
+        // Check for binary operator or assignment
+        if (tokens[*pos].type == TOKEN_OPERATOR || tokens[*pos].type == TOKEN_ASSIGN) {
             char op = tokens[*pos].value[0];
-            
+            bool is_assignment = (tokens[*pos].type == TOKEN_ASSIGN);
+
             // Check for unary increment/decrement (++ or --)
             if (op == '+' && tokens[*pos + 1].type == TOKEN_OPERATOR && tokens[*pos + 1].value[0] == '+') {
                 // Handle ++ (increment)
                 (*pos) += 2;  // Skip both + tokens
-                
+
                 // Create unary operation node
                 ASTNode* node = malloc(sizeof(ASTNode));
                 if (node == NULL) {
                     free_ast(left);
                     return NULL;
                 }
-                
+
                 node->type = AST_UNARY_OP;
                 node->left = left;
                 node->right = NULL;
                 node->op = '+';  // Use + to indicate increment
                 node->value_type = VALUE_TYPE_OPERATOR;
-                
+
                 return node;
             } else if (op == '-' && tokens[*pos + 1].type == TOKEN_OPERATOR && tokens[*pos + 1].value[0] == '-') {
                 // Handle -- (decrement)
                 (*pos) += 2;  // Skip both - tokens
-                
+
                 // Create unary operation node
                 ASTNode* node = malloc(sizeof(ASTNode));
                 if (node == NULL) {
                     free_ast(left);
                     return NULL;
                 }
-                
+
                 node->type = AST_UNARY_OP;
                 node->left = left;
                 node->right = NULL;
                 node->op = '-';  // Use - to indicate decrement
                 node->value_type = VALUE_TYPE_OPERATOR;
-                
+
                 return node;
             } else {
                 // Handle regular binary operator
                 (*pos)++;
-                
+
                 // Parse right operand
                 ASTNode* right = parse_expression(tokens, pos);
                 if (right == NULL) {
                     free_ast(left);
                     return NULL;
                 }
-                
+
                 // Create binary operation node
                 ASTNode* node = malloc(sizeof(ASTNode));
                 if (node == NULL) {
@@ -633,13 +750,13 @@ ASTNode* parse_expression(Token* tokens, int *pos) {
                     free_ast(right);
                     return NULL;
                 }
-                
+
                 node->type = AST_BINARY_OP;
                 node->left = left;
                 node->right = right;
-                node->op = op;
+                node->op = is_assignment ? '=' : op;
                 node->value_type = VALUE_TYPE_OPERATOR;
-                
+
                 return node;
             }
         }
@@ -649,4 +766,40 @@ ASTNode* parse_expression(Token* tokens, int *pos) {
     
     // TODO: Add support for more expression types (unary ops, etc.)
     return NULL;
+}
+
+ASTNode* parse_for_init(Token* tokens, int *pos) {
+    // Check if this is a variable declaration (let identifier = expression)
+    if (tokens[*pos].type == TOKEN_LET) {
+        (*pos)++;  // Move past LET
+
+        if (tokens[*pos].type != TOKEN_IDENTIFIER) {
+            fprintf(stderr, "Expected identifier after 'let' at position %d\n", *pos);
+            return NULL;
+        }
+
+        char *name = strdup(tokens[*pos].value);
+        if (name == NULL) {
+            return NULL;
+        }
+        (*pos)++;  // Move past identifier
+
+        if (tokens[*pos].type != TOKEN_ASSIGN) {
+            fprintf(stderr, "Expected '=' in variable declaration at position %d\n", *pos);
+            free(name);
+            return NULL;
+        }
+        (*pos)++;  // Move past '='
+
+        ASTNode *value = parse_expression(tokens, pos);
+        if (value == NULL) {
+            free(name);
+            return NULL;
+        }
+
+        return create_var_declare_node(name, value);
+    }
+
+    // Otherwise, parse as a regular expression
+    return parse_expression(tokens, pos);
 }
