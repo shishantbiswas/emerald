@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-ASTNode* make_ast_program(Token *tokens, int token_count, int *ast_count) {
+ASTNode* make_ast_program(Token *tokens) {
     ASTNode **statements = malloc(sizeof(ASTNode*) * 1024);
     if (statements == NULL) {
         return NULL;
@@ -12,7 +12,7 @@ ASTNode* make_ast_program(Token *tokens, int token_count, int *ast_count) {
     int statement_count = 0;
     int pos = 0;
     
-    while (pos < token_count && tokens[pos].type != TOKEN_EOF) {
+    while (tokens[pos].type != TOKEN_EOF) {
         ASTNode *stmt = parse_statement(tokens, &pos);
         if (stmt == NULL) {
             // Free any successfully parsed statements before returning
@@ -25,7 +25,6 @@ ASTNode* make_ast_program(Token *tokens, int token_count, int *ast_count) {
         statements[statement_count++] = stmt;
     }
     
-    *ast_count = statement_count;
     return create_program_node(statements, statement_count);
 }
 

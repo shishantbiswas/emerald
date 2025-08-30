@@ -59,7 +59,7 @@ typedef struct ASTNode {
 } ASTNode;
 
 // Function declarations
-ASTNode* make_ast_program(Token* tokens, int token_count, int *ast_count);
+ASTNode* make_ast_program(Token* tokens);
 ASTNode* create_print_node(char* value);
 void print_ast(ASTNode* node);
 void free_ast(ASTNode* node);

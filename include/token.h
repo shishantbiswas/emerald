@@ -75,7 +75,7 @@ typedef struct Token {
 } Token;
 
 // Tokenizer functions
-Token* tokenize(const char* input, int* token_count);
+Token* tokenize(const char* input);
 void free_tokens(Token* tokens);
 void print_tokens(const Token* tokens);
 char* token_type_to_string(Token_Type type);

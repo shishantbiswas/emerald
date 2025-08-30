@@ -40,43 +40,41 @@ int main(int argc, char *argv[]) {
     }
     
     // Tokenize
-    int token_count = 0;
-    Token* tokens = tokenize(file_data, &token_count);
+    Token* tokens = tokenize(file_data);
     #ifdef DEBUG
     print_tokens(tokens);
-    printf("Token count: %d\n", token_count);
     #endif
     
     // Parse
-    int ast_count = 0;
-    ASTNode* ast = make_ast_program(tokens, token_count, &ast_count);
+    // ASTNode* ast = make_ast_program(tokens);
     
     // Debug output
     #ifdef DEBUG
-    if (ast == NULL) {
-        printf("Error: Failed to create AST\n");
-    } else {
-        print_ast(ast);
-        printf("AST count: %d\n", ast_count);
-    }
+    // if (ast == NULL) {
+    //     printf("Error: Failed to create AST\n");
+    // } else {
+    //     print_ast(ast);
+    // }
     #endif
 
     // Make IR
-    int ir_success = make_ir(ast);
-    if(ir_success != 0) {
-        printf("Error: Could not make IR\n");
-    }
+    // int ir_success = make_ir(ast);
+    // if(ir_success != 0) {
+    //     printf("Error: Could not make IR\n");
+    // }
     
     // Free memory
-    if (ast != NULL) {
-        free_ast(ast);
-    }
+    // if (ast != NULL) {
+    //     free_ast(ast);
+    // }
 
     if (tokens != NULL) {
         free_tokens(tokens);
     };
-
-    free(file_data);
+    
+    if(file_data != NULL) {
+        free(file_data);
+    }
     fclose(fp);
     return 0;
 }

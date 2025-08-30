@@ -1,3 +1,1 @@
-for (let i = 0; i < 10; i++) {
-    print("Hello, from emerald!");
-}
+for { print("Hello, from emerald!"); };

@@ -7,8 +7,11 @@
 // Forward declarations
 int is_operator(char c);
 int is_punctuation(char c);
+void handle_identifier_and_keyword(Token* tokens, int token_index, const char* input, int* i, int* column);
+void handle_punctuation(Token* tokens, int token_index, const char* input, int* i, int* column);
+void handle_string(Token* tokens, int token_index, const char* input, int* i, int* column);
 
-Token* tokenize(const char* input, int* token_count) {
+Token* tokenize(const char* input) {
     if (input == NULL) return NULL;
     
     Token *tokens = malloc(sizeof(Token) * 1024);
@@ -38,62 +41,11 @@ Token* tokenize(const char* input, int* token_count) {
         
         // Handle identifiers and keywords
         if (isalpha(input[i]) || input[i] == '_') {
-            int start = i;
-            while (isalnum(input[i]) || input[i] == '_') {
-                i++;
-                column++;
-            }
-            int length = i - start;
-            tokens[token_index].type = TOKEN_IDENTIFIER;
-            tokens[token_index].value = strndup(input + start, length);
-            tokens[token_index].length = length;
-            
-            // Check if it's a keyword
-            if (strcmp(tokens[token_index].value, "print") == 0) {
-                tokens[token_index].type = TOKEN_PRINT;
-            } else if (strcmp(tokens[token_index].value, "if") == 0) {
-                tokens[token_index].type = TOKEN_IF;
-            } else if (strcmp(tokens[token_index].value, "else") == 0) {
-                tokens[token_index].type = TOKEN_ELSE;
-            } else if (strcmp(tokens[token_index].value, "foreach") == 0) {
-                tokens[token_index].type = TOKEN_FOREACH;
-            } else if (strcmp(tokens[token_index].value, "for") == 0) {
-                tokens[token_index].type = TOKEN_FOR;
-            } else if (strcmp(tokens[token_index].value, "while") == 0) {
-                tokens[token_index].type = TOKEN_WHILE;
-            }else if (strcmp(tokens[token_index].value, "let") == 0) {
-                tokens[token_index].type = TOKEN_LET;
-            } else if (strcmp(tokens[token_index].value, "mut") == 0) {
-                tokens[token_index].type = TOKEN_MUT;
-            } else if (strcmp(tokens[token_index].value, "const") == 0) {
-                tokens[token_index].type = TOKEN_CONST;
-            } else if (strcmp(tokens[token_index].value, "function") == 0) {
-                tokens[token_index].type = TOKEN_FUNCTION;
-            } else if (strcmp(tokens[token_index].value, "return") == 0) {
-                tokens[token_index].type = TOKEN_RETURN;
-            } 
+            handle_identifier_and_keyword(tokens, token_index, input, &i, &column);
         }
         // Handle strings
         else if (input[i] == '"') {
-            i++;
-            column++;
-            int start = i;
-            while (input[i] != '"' && input[i] != '\0') {
-                i++;
-                column++;
-            }
-            if (input[i] == '"') {
-                int length = i - start;
-                tokens[token_index].type = TOKEN_STRING;
-                tokens[token_index].value = strndup(input + start, length);
-                tokens[token_index].length = length;
-                i++;
-                column++;
-            } else {
-                // Unclosed string
-                fprintf(stderr, "Error: Unclosed string at line %d, column %d\n", line, column);
-                return NULL;
-            }
+            handle_string(tokens, token_index, input, &i, &column);
         }
         
         // Handle int
@@ -121,33 +73,7 @@ Token* tokenize(const char* input, int* token_count) {
         }
         // Handle punctuation
         else if (is_punctuation(input[i])) {
-            if (input[i] == '(') {
-                tokens[token_index].type = TOKEN_LEFT_PAREN;
-            } else if (input[i] == ')') {
-                tokens[token_index].type = TOKEN_RIGHT_PAREN;
-            } else if (input[i] == '{') {
-                tokens[token_index].type = TOKEN_LEFT_BRACE;
-            } else if (input[i] == '}') {
-                tokens[token_index].type = TOKEN_RIGHT_BRACE;
-            } else if (input[i] == ';') {
-                tokens[token_index].type = TOKEN_SEMICOLON;
-            } else if (input[i] == ',') {
-                tokens[token_index].type = TOKEN_COMMA;
-            } else if (input[i] == '.') {
-                tokens[token_index].type = TOKEN_DOT;
-            } else if (input[i] == ':') {
-                tokens[token_index].type = TOKEN_COLON;
-            } else if (input[i] == '?') {
-                tokens[token_index].type = TOKEN_QUESTION;
-            } else if (input[i] == '!') {
-                tokens[token_index].type = TOKEN_EXCLAMATION;
-            } else if (input[i] == '~') {
-                tokens[token_index].type = TOKEN_TILDE;
-            }
-            tokens[token_index].value = strndup(input + i, 1);
-            tokens[token_index].length = 1;
-            i++;
-            column++;
+            handle_punctuation(tokens, token_index, input, &i, &column);
         }
         // Skip comments for now
         else if (input[i] == '/' && input[i+1] == '/') {
@@ -175,7 +101,6 @@ Token* tokenize(const char* input, int* token_count) {
     tokens[token_index].length = 0;
     tokens[token_index].line = line;
     tokens[token_index].column = column;
-    if (token_count) *token_count = token_index;
     return tokens;
 }
 
@@ -219,6 +144,7 @@ char* token_type_to_string(Token_Type type) {
         case TOKEN_STRING:      return "STRING";
         case TOKEN_IDENTIFIER:  return "IDENTIFIER";
         case TOKEN_PRINT:       return "PRINT";
+        case TOKEN_BOOL:        return "BOOL";
         case TOKEN_IF:          return "IF";
         case TOKEN_ELSE:        return "ELSE";
         case TOKEN_FOREACH:     return "FOREACH";
@@ -253,7 +179,7 @@ void print_tokens(const Token* tokens) {
     printf("Tokens:\n");
     printf("%-20s %-20s %-10s %-10s %s\n", 
            "Type", "Value", "Line", "Column", "Length");
-    printf("--------------------------------------------------\n");
+    printf("-----------------------------------------------------------------------\n");
     
     for (int i = 0; tokens[i].type != TOKEN_EOF; i++) {
         const char* value = tokens[i].value;
@@ -286,4 +212,98 @@ void print_tokens(const Token* tokens) {
            tokens[0].line, 
            tokens[0].column, 
            0);
+}
+
+// Handle identifier and keywords
+void handle_identifier_and_keyword(Token* tokens, int token_index, const char* input, int* i, int* column) {
+    int start = *i;
+    while (isalnum(input[*i]) || input[*i] == '_') {
+        (*i)++;
+        (*column)++;
+    }
+    int length = *i - start;
+    tokens[token_index].type = TOKEN_IDENTIFIER;
+    tokens[token_index].value = strndup(input + start, length);
+    tokens[token_index].length = length;
+        
+    // Check if it's a keyword
+    if (strcmp(tokens[token_index].value, "print") == 0) {
+        tokens[token_index].type = TOKEN_PRINT;
+    } else if (strcmp(tokens[token_index].value, "if") == 0) {
+        tokens[token_index].type = TOKEN_IF;
+    } else if (strcmp(tokens[token_index].value, "else") == 0) {
+        tokens[token_index].type = TOKEN_ELSE;
+    } else if (strcmp(tokens[token_index].value, "foreach") == 0) {
+        tokens[token_index].type = TOKEN_FOREACH;
+    } else if (strcmp(tokens[token_index].value, "for") == 0) {
+        tokens[token_index].type = TOKEN_FOR;
+    } else if (strcmp(tokens[token_index].value, "while") == 0) {
+        tokens[token_index].type = TOKEN_WHILE;
+    }else if (strcmp(tokens[token_index].value,  "let") == 0) {
+        tokens[token_index].type = TOKEN_LET;
+    } else if (strcmp(tokens[token_index].value, "mut") == 0) {
+        tokens[token_index].type = TOKEN_MUT;
+    } else if (strcmp(tokens[token_index].value, "const") == 0) {
+        tokens[token_index].type = TOKEN_CONST;
+    } else if (strcmp(tokens[token_index].value, "function") == 0) {
+        tokens[token_index].type = TOKEN_FUNCTION;
+    } else if (strcmp(tokens[token_index].value, "return") == 0) {
+        tokens[token_index].type = TOKEN_RETURN;
+    } else if (strcmp(tokens[token_index].value, "true") == 0) {
+        tokens[token_index].type = TOKEN_BOOL;
+    } else if (strcmp(tokens[token_index].value, "false") == 0) {
+        tokens[token_index].type = TOKEN_BOOL;
+    }
+}
+
+// Handle punctuation
+void handle_punctuation(Token* tokens, int token_index, const char* input, int* i, int* column) {
+    if (input[*i] == '(') {
+        tokens[token_index].type = TOKEN_LEFT_PAREN;
+    } else if (input[*i] == ')') {
+        tokens[token_index].type = TOKEN_RIGHT_PAREN;
+    } else if (input[*i] == '{') {
+        tokens[token_index].type = TOKEN_LEFT_BRACE;
+    } else if (input[*i] == '}') {
+        tokens[token_index].type = TOKEN_RIGHT_BRACE;
+    } else if (input[*i] == ';') {
+        tokens[token_index].type = TOKEN_SEMICOLON;
+    } else if (input[*i] == ',') {
+        tokens[token_index].type = TOKEN_COMMA;
+    } else if (input[*i] == '.') {
+        tokens[token_index].type = TOKEN_DOT;
+    } else if (input[*i] == ':') {
+        tokens[token_index].type = TOKEN_COLON;
+    } else if (input[*i] == '?') {
+        tokens[token_index].type = TOKEN_QUESTION;
+    } else if (input[*i] == '!') {
+        tokens[token_index].type = TOKEN_EXCLAMATION;
+    } else if (input[*i] == '~') {
+        tokens[token_index].type = TOKEN_TILDE;
+    }
+    tokens[token_index].value = strndup(input + *i, 1);
+    tokens[token_index].length = 1;
+    (*i)++;
+    (*column)++;
+}
+
+// Handle string
+void handle_string(Token* tokens, int token_index, const char* input, int* i, int* column) {    
+    (*i)++;
+    (*column)++;
+    int start = *i;
+    while (input[*i] != '"' && input[*i] != '\0') {
+        (*i)++;
+        (*column)++;
+    }
+    if (input[*i] == '"') {
+        int length = *i - start;
+        tokens[token_index].type = TOKEN_STRING;
+        tokens[token_index].value = strndup(input + start, length);
+        tokens[token_index].length = length;
+        (*i)++;
+        (*column)++;
+    } else {
+        fprintf(stderr, "Error: Unclosed string at line %d, column %d\n", tokens[token_index].line, tokens[token_index].column);
+    }
 }
