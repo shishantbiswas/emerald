@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     // Tokenize
     Token* tokens = tokenize(file_data);
     #ifdef DEBUG
-    print_tokens(tokens);
+    // print_tokens(tokens);
     #endif
     
     // Parse
@@ -58,10 +58,10 @@ int main(int argc, char *argv[]) {
     #endif
 
     // Make IR
-    // int ir_success = make_ir(ast);
-    // if(ir_success != 0) {
-    //     printf("Error: Could not make IR\n");
-    // }
+    int ir_success = make_ir(ast);
+    if(ir_success != 0) {
+        printf("Error: Could not make IR\n");
+    }
     
     // Free memory
     if (ast != NULL) {

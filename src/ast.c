@@ -68,24 +68,36 @@ void print_ast(ASTNode* node) {
             
         case AST_FOR_LOOP:
             printf("FOR_LOOP (\n");
-            if (node->left) {
-                printf("  init: ");
-                print_ast(node->left);
-            }
-            // TODO: Display condition and update when we store them properly
-            if (node->value.int_value == 0) {
-                printf("  condition: <infinite loop>\n");
+            // Print initialization
+            printf("  init: ");
+            if (node->data.for_loop.init) {
+                print_ast(node->data.for_loop.init);
             } else {
-                printf("  condition: <condition exists>\n");
+                printf("<none>\n");
             }
-            if (strcmp(node->name, "has_update") == 0) {
-                printf("  update: <update exists>\n");
+            
+            // Print condition
+            printf("  condition: ");
+            if (node->data.for_loop.condition) {
+                print_ast(node->data.for_loop.condition);
             } else {
-                printf("  update: <no update>\n");
+                printf("<infinite loop>\n");
             }
-            if (node->right) {
-                printf("  body: ");
-                print_ast(node->right);
+            
+            // Print update
+            printf("  update: ");
+            if (node->data.for_loop.update) {
+                print_ast(node->data.for_loop.update);
+            } else {
+                printf("<none>\n");
+            }
+            
+            // Print body
+            printf("  body: ");
+            if (node->data.for_loop.body) {
+                print_ast(node->data.for_loop.body);
+            } else {
+                printf("<empty>\n");
             }
             printf(")\n");
             return;
@@ -561,27 +573,19 @@ ASTNode* create_for_loop_node(ASTNode* init, ASTNode* condition, ASTNode* update
     ASTNode* node = malloc(sizeof(ASTNode));
     if (node == NULL) return NULL;
     
-    memset(node, 0, sizeof(ASTNode));  // Zero out the entire structure
+    memset(node, 0, sizeof(ASTNode));
     node->type = AST_FOR_LOOP;
-    node->left = init;      // Store initialization in left child
-    node->right = body;     // Store body in right child
     
-    // Store condition and update in additional fields
-    // For now, we'll use a simple approach and store them in the value union
-    // In a more complete implementation, you might want to extend the ASTNode structure
-    // to have more children or use a different approach
-    if (condition) {
-        node->value.int_value = 1;  // Indicate condition exists
-    } else {
-        node->value.int_value = 0;  // Indicate no condition (infinite loop)
-    }
+    // Store all loop components in the for_loop data structure
+    node->data.for_loop.init = init;
+    node->data.for_loop.condition = condition;
+    node->data.for_loop.update = update;
+    node->data.for_loop.body = body;
     
-    // Store update information in the name field for now
-    if (update) {
-        strncpy(node->name, "has_update", sizeof(node->name) - 1);
-    } else {
-        strncpy(node->name, "no_update", sizeof(node->name) - 1);
-    }
+    // For backward compatibility, keep left and right pointers
+    // pointing to init and body respectively
+    node->left = init;
+    node->right = body;
     
     return node;
 }

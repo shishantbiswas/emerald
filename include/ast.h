@@ -29,6 +29,16 @@ typedef union {
     char *string_value;
 } ASTValue;
 
+// Forward declaration
+struct ASTNode;
+
+typedef struct ForLoopData {
+    struct ASTNode* init;
+    struct ASTNode* condition;
+    struct ASTNode* update;
+    struct ASTNode* body;
+} ForLoopData;
+
 typedef struct ASTNode {
     ASTNode_Type type;
     struct ASTNode* left;
@@ -56,6 +66,12 @@ typedef struct ASTNode {
         VALUE_TYPE_WHITESPACE,
     } value_type;
     ASTValue value;
+    
+    // Union for node-specific data
+    union {
+        ForLoopData for_loop;
+        // Add other node type specific data here
+    } data;
 } ASTNode;
 
 // Function declarations
