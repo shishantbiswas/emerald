@@ -45,6 +45,11 @@ typedef enum {
     TOKEN_LET,          // Keyword let
     TOKEN_MUT,          // Keyword mut
     TOKEN_CONST,        // Keyword const
+    TOKEN_IMPORT,       // Keyword import
+    TOKEN_EXPORT,       // Keyword export
+    TOKEN_EXTERN,       // Keyword extern
+    TOKEN_ASYNC,        // Keyword async
+    TOKEN_DEFER,        // Keyword defer
 
     // Operators
     TOKEN_COLON,        // Colon : for type annotations
@@ -79,5 +84,6 @@ Token* tokenize(const char* input);
 void free_tokens(Token* tokens);
 void print_tokens(const Token* tokens);
 char* token_type_to_string(Token_Type type);
+const char* token_type_name(Token_Type type);
 
 #endif // TOKEN_H

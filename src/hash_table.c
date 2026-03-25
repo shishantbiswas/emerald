@@ -40,49 +40,57 @@ Hashtable* createHashtable(int size) {
 }
 
 // Function to insert a key-value pair into the hashtable
-void insertEntry(Hashtable* hashtable, char* data) {
-    if (hashtable == NULL || hashtable->table == NULL || data == NULL) {
+void insertEntry(Hashtable* hashtable, char* key, void* data, int is_string) {
+    if (hashtable == NULL || hashtable->table == NULL || key == NULL) {
         return;  // Invalid parameters
     }
 
     // Calculate hash and ensure it's within table bounds
-    unsigned int h = hash(data);
+    unsigned int h = hash(key);
     int index = h % hashtable->size;
-    
+
     // Create new entry
     Entry* newEntry = (Entry*)malloc(sizeof(Entry));
     if (newEntry == NULL) {
         return;  // Memory allocation failed
     }
-    
-    newEntry->data = strdup(data);  // Make a copy of the string
-    if (newEntry->data == NULL) {
+
+    newEntry->key = strdup(key);  // Make a copy of the key
+    if (newEntry->key == NULL) {
         free(newEntry);
-        return;  // Failed to duplicate string
+        return;  // Failed to duplicate key
     }
-    
+
+    newEntry->data = is_string ? strdup((char*)data) : (char*)data;
+    newEntry->is_string = is_string;
+
     newEntry->next = hashtable->table[index];
     hashtable->table[index] = newEntry;
 }
 
 // Function to search for a value by key in the hashtable
-char* searchEntry(Hashtable* hashtable, char* data) {
-    if (hashtable == NULL || hashtable->table == NULL || data == NULL) {
+void* findEntry(Hashtable* hashtable, char* key) {
+    if (hashtable == NULL || hashtable->table == NULL || key == NULL) {
         return NULL;  // Invalid parameters
     }
 
-    unsigned int h = hash(data);
+    unsigned int h = hash(key);
     int index = h % hashtable->size;
     Entry* current = hashtable->table[index];
-    
+
     while (current != NULL) {
-        if (strcmp(current->data, data) == 0) {
-            return current->data;
+        if (strcmp(current->key, key) == 0) {
+            return (void*)current->data;
         }
         current = current->next;
     }
-    
+
     return NULL; // Not found
+}
+
+// For backward compatibility
+char* searchEntry(Hashtable* hashtable, char* data) {
+    return (char*)findEntry(hashtable, data);
 }
 
 // Function to delete an entry from the hashtable
@@ -136,7 +144,8 @@ void freeHashtable(Hashtable* hashtable) {
             while (current != NULL) {
                 Entry* temp = current;
                 current = current->next;
-                if (temp->data != NULL) {
+                free(temp->key);
+                if (temp->is_string && temp->data != NULL) {
                     free(temp->data);  // Free the duplicated string
                 }
                 free(temp);

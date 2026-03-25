@@ -150,17 +150,28 @@ char* token_type_to_string(Token_Type type) {
         case TOKEN_IF:          return "IF";
         case TOKEN_ELSE:        return "ELSE";
         case TOKEN_FOREACH:     return "FOREACH";
+        case TOKEN_FUNCTION:    return "FUNCTION";
         case TOKEN_FOR:         return "FOR";
         case TOKEN_WHILE:       return "WHILE";
         case TOKEN_RETURN:      return "RETURN";
         case TOKEN_LET:         return "LET";
+        case TOKEN_MUT:         return "MUT";
+        case TOKEN_CONST:       return "CONST";
+        case TOKEN_IMPORT:      return "IMPORT";
+        case TOKEN_EXPORT:      return "EXPORT";
+        case TOKEN_EXTERN:      return "EXTERN";
+        case TOKEN_ASYNC:       return "ASYNC";
+        case TOKEN_DEFER:       return "DEFER";
         case TOKEN_ASSIGN:      return "ASSIGN";
         case TOKEN_OPERATOR:    return "OPERATOR";
         case TOKEN_RIGHT_PAREN: return "RIGHT_PAREN";
         case TOKEN_LEFT_PAREN:  return "LEFT_PAREN";
         case TOKEN_RIGHT_BRACE: return "RIGHT_BRACE";
         case TOKEN_LEFT_BRACE:  return "LEFT_BRACE";
+        case TOKEN_RIGHT_SQUARE: return "RIGHT_SQUARE";
+        case TOKEN_LEFT_SQUARE: return "LEFT_SQUARE";
         case TOKEN_SEMICOLON:   return "SEMICOLON";
+        case TOKEN_TILDE:       return "TILDE";
         case TOKEN_COLON:       return "COLON";
         case TOKEN_COMMA:       return "COMMA";
         case TOKEN_DOT:         return "DOT";
@@ -168,11 +179,33 @@ char* token_type_to_string(Token_Type type) {
         case TOKEN_EXCLAMATION: return "EXCLAMATION";
         case TOKEN_COMMENT:     return "COMMENT";
         case TOKEN_WHITESPACE:  return "WHITESPACE";
+        // Integer types
+        case TOKEN_I8:          return "I8";
+        case TOKEN_I16:         return "I16";
+        case TOKEN_I32:         return "I32";
+        case TOKEN_I64:         return "I64";
+        case TOKEN_I128:        return "I128";
+        case TOKEN_U8:          return "U8";
+        case TOKEN_U16:         return "U16";
+        case TOKEN_U32:         return "U32";
+        case TOKEN_U64:         return "U64";
+        case TOKEN_U128:        return "U128";
+        // Float types
+        case TOKEN_F8:          return "F8";
+        case TOKEN_F16:         return "F16";
+        case TOKEN_F32:         return "F32";
+        case TOKEN_F64:         return "F64";
+        case TOKEN_F128:        return "F128";
         default:                return "UNKNOWN";
     }
 }
 
-// Example usage
+// Const version for use in error messages
+const char* token_type_name(Token_Type type) {
+    return token_type_to_string(type);
+}
+
+// Print tokens in a table format
 void print_tokens(const Token* tokens) {
     if (tokens == NULL) {
         printf("No tokens to print.\n");

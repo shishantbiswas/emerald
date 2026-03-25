@@ -1,0 +1,57 @@
+---
+title: Welcome to Emerald
+description: A modern systems programming language
+---
+
+Welcome to the **Emerald Programming Language** documentation!
+
+Emerald is a modern systems programming language designed for performance, safety, and expressiveness. It compiles to efficient machine code via QBE (QBE Compiler Backend).
+
+## Getting Started
+
+Get started with Emerald in minutes:
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd emerald
+
+# Build the compiler
+make
+
+# Compile a simple program
+./build/main examples/hello.em -c hello
+./hello
+```
+
+## Language Features
+
+Emerald offers modern language features while maintaining low-level control:
+
+- **Type System**: Static typing with inference
+- **Memory Safety**: Built-in bounds checking and ownership
+- **Performance**: Zero-cost abstractions, direct hardware access
+- **Interoperability**: Easy FFI with C libraries
+- **Tooling**: Fast compilation, helpful error messages
+
+## Quick Example
+
+```emerald
+function fibonacci(n: i32): i32 {
+    if n <= 1 {
+        return n;
+    }
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+function main(): i32 {
+    print("Fibonacci of 10: ", fibonacci(10));
+    return 0;
+}
+```
+
+<Cards>
+  <Card title="Installation" href="/docs/installation" />
+  <Card title="Language Guide" href="/docs/language" />
+  <Card title="Examples" href="/docs/examples" />
+</Cards>

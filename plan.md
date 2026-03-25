@@ -21,6 +21,8 @@
 - [-] Parser
 - [ ] Loops
 - [ ] Conditionals
+- [ ] Binary Operation
+- [ ] Unary Operation
 - [ ] 
 - [ ] LSP
 - [ ] RAII (the good bit no `shared_pointer` bullshit)
@@ -30,7 +32,7 @@
 - [ ] Standard Library
         - IO
         - Math Library
-        - 
+        - Threads
 - [ ] Module System
 - [ ] Compiler
 

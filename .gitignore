@@ -6,3 +6,4 @@ out
 out.s
 build/*
 c3c
+qdrant_data

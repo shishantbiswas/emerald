@@ -1,0 +1,77 @@
+---
+title: Language Syntax
+description: Emerald programming language syntax overview
+---
+
+# Emerald Language Syntax
+
+Emerald uses a clean, readable syntax inspired by modern systems languages.
+
+## Variables and Types
+
+```emerald
+// Variable declarations with type inference
+let x = 42;        // i32 inferred
+let name = "Hello"; // string inferred
+
+// Explicit typing
+let age: i32 = 25;
+let pi: f64 = 3.14159;
+let is_active: bool = true;
+```
+
+## Functions
+
+```emerald
+// Function declaration
+function add(a: i32, b: i32): i32 {
+    return a + b;
+}
+
+// Main function (entry point)
+function main(): i32 {
+    let result = add(5, 3);
+    print("Result: ", result);
+    return 0;
+}
+```
+
+## Control Flow
+
+```emerald
+// If statements
+if x > 10 {
+    print("x is greater than 10");
+} else if x > 5 {
+    print("x is greater than 5");
+} else {
+    print("x is 5 or less");
+}
+
+// While loops
+while i < 10 {
+    print("i = ", i);
+    i = i + 1;
+}
+
+// For loops (when implemented)
+for let i = 0; i < 10; i = i + 1 {
+    print("i = ", i);
+}
+```
+
+## Comments
+
+```emerald
+// Single line comment
+
+/*
+Multi-line
+comment
+*/
+```
+
+## Built-in Functions
+
+- `print(args...)`: Print values to stdout
+- `println(args...)`: Print values with newline

@@ -3,7 +3,9 @@
 
 // Hashtable Entry
 typedef struct Entry {
+    char* key;
     char* data;
+    int is_string;
     struct Entry* next;
 } Entry;
 
@@ -15,8 +17,9 @@ typedef struct Hashtable {
 
 // Function declarations
 Hashtable* createHashtable(int size);
-void insertEntry(Hashtable* hashtable, char* data);
-char* searchEntry(Hashtable* hashtable, char* data);
+void insertEntry(Hashtable* hashtable, char* key, void* data, int is_string);
+void* findEntry(Hashtable* hashtable, char* key);
+char* searchEntry(Hashtable* hashtable, char* data); // For string lookup
 void deleteEntry(Hashtable* hashtable, char* data);
 void freeHashtable(Hashtable* hashtable);
 

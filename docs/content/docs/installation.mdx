@@ -1,0 +1,83 @@
+---
+title: Installation
+description: How to install and set up Emerald
+---
+
+# Installation
+
+## Prerequisites
+
+Before installing Emerald, ensure you have:
+
+- **GCC** or **Clang** compiler
+- **QBE** (QBE Compiler Backend) - Download from [c9x.me/qbe](https://c9x.me/qbe/)
+- **Git** for cloning the repository
+- **Make** for building
+
+## Building from Source
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd emerald
+
+# Build the compiler
+make
+
+# Verify installation
+./build/main --help
+```
+
+## Setting up QBE
+
+Emerald requires QBE for code generation:
+
+```bash
+# Download and extract QBE
+wget https://c9x.me/compile/release/qbe-1.2.tar.xz
+tar -xf qbe-1.2.tar.xz
+cd qbe-1.2
+
+# Build QBE
+make
+sudo make install  # Install to /usr/local/bin
+```
+
+## Testing the Installation
+
+Create a simple test program:
+
+```emerald
+// test.em
+function main(): i32 {
+    print("Hello, Emerald!");
+    return 0;
+}
+```
+
+Compile and run:
+
+```bash
+./build/main test.em -c test
+./test
+```
+
+You should see: `Hello, Emerald!`
+
+## Troubleshooting
+
+### QBE not found
+Ensure QBE is installed and available in your PATH:
+```bash
+which qbe
+qbe --version
+```
+
+### Build failures
+Make sure you have GCC and development headers installed:
+```bash
+# Ubuntu/Debian
+sudo apt-get install build-essential
+
+# macOS
+xcode-select --install
