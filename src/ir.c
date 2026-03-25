@@ -544,35 +544,6 @@ static void generate_if(ASTNode *node) {
     current_block = merge_block;
 }
 
-// Generate while loop
-static void generate_while(ASTNode *node) {
-    ASTWhileStmt *while_stmt = (ASTWhileStmt*)node;
-    
-    IRBasicBlock *cond_block = ir_basic_block_create(current_function, "while.cond");
-    IRBasicBlock *body_block = ir_basic_block_create(current_function, "while.body");
-    IRBasicBlock *end_block = ir_basic_block_create(current_function, "while.end");
-    
-    // Branch to condition
-    IRInstruction *br = ir_inst_create(current_block, IR_BR);
-    br->target = cond_block;
-    
-    // Condition block
-    current_block = cond_block;
-    IRValue *cond = generate_expression(while_stmt->condition);
-    IRInstruction *cbr = ir_inst_create(current_block, IR_CBR);
-    cbr->arg = cond;
-    cbr->true_target = body_block;
-    cbr->false_target = end_block;
-    
-    // Body block
-    current_block = body_block;
-    generate_statement(while_stmt->body);
-    IRInstruction *br_body = ir_inst_create(current_block, IR_BR);
-    br_body->target = cond_block;
-    
-    // End block
-    current_block = end_block;
-}
 
 // Generate for loop
 static void generate_for(ASTNode *node) {
@@ -728,11 +699,7 @@ static void generate_statement(ASTNode *node) {
         case AST_IF_STMT:
             generate_if(node);
             break;
-            
-        case AST_WHILE_STMT:
-            generate_while(node);
-            break;
-            
+
         case AST_FOR_STMT:
             generate_for(node);
             break;

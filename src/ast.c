@@ -514,23 +514,6 @@ static ASTIfStmt *parse_if(Parser *parser) {
     return node;
 }
 
-// Parse while statement
-static ASTWhileStmt *parse_while(Parser *parser) {
-    
-    ASTWhileStmt *node = ast_new(parser->arena, ASTWhileStmt);
-    node->kind = AST_WHILE_STMT;
-    node->type = NULL;
-    node->line = parser_current(parser)->line;
-    node->column = parser_current(parser)->column;
-    
-    parser_expect(parser, TOKEN_LEFT_PAREN, "Expected '('");
-    node->condition = parse_expression(parser);
-    parser_expect(parser, TOKEN_RIGHT_PAREN, "Expected ')'");
-    
-    node->body = parse_statement(parser);
-    
-    return node;
-}
 
 // Parse for statement
 static ASTForStmt *parse_for(Parser *parser) {
@@ -752,11 +735,6 @@ static ASTNode *parse_statement(Parser *parser) {
     // If
     if (parser_match(parser, TOKEN_IF)) {
         return (ASTNode*)parse_if(parser);
-    }
-    
-    // While
-    if (parser_match(parser, TOKEN_WHILE)) {
-        return (ASTNode*)parse_while(parser);
     }
     
     // For
@@ -1037,12 +1015,8 @@ void ast_node_accept(ASTNode *node, ASTVisitor *visitor, void *data) {
                 visitor->visit_block((ASTBlock*)node, data);
             break;
         case AST_IF_STMT:
-            if (visitor->visit_if_stmt) 
+            if (visitor->visit_if_stmt)
                 visitor->visit_if_stmt((ASTIfStmt*)node, data);
-            break;
-        case AST_WHILE_STMT:
-            if (visitor->visit_while_stmt) 
-                visitor->visit_while_stmt((ASTWhileStmt*)node, data);
             break;
         case AST_FOR_STMT:
             if (visitor->visit_for_stmt) 
@@ -1156,16 +1130,6 @@ static void print_if(ASTIfStmt *if_stmt, int indent) {
     }
 }
 
-static void print_while(ASTWhileStmt *while_stmt, int indent) {
-    print_indent(indent);
-    printf("While:\n");
-    print_indent(indent + 1);
-    printf("Condition:\n");
-    print_node(while_stmt->condition, indent + 2);
-    print_indent(indent + 1);
-    printf("Body:\n");
-    print_node(while_stmt->body, indent + 2);
-}
 
 static void print_for(ASTForStmt *for_stmt, int indent) {
     print_indent(indent);
@@ -1287,9 +1251,6 @@ static void print_node(ASTNode *node, int indent) {
         case AST_IF_STMT:
             print_if((ASTIfStmt*)node, indent);
             break;
-        case AST_WHILE_STMT:
-            print_while((ASTWhileStmt*)node, indent);
-            break;
         case AST_FOR_STMT:
             print_for((ASTForStmt*)node, indent);
             break;
@@ -1353,7 +1314,6 @@ const char *ast_node_kind_name(ASTNodeKind kind) {
         case AST_PARAM: return "Param";
         case AST_BLOCK: return "Block";
         case AST_IF_STMT: return "IfStmt";
-        case AST_WHILE_STMT: return "WhileStmt";
         case AST_FOR_STMT: return "ForStmt";
         case AST_RETURN_STMT: return "ReturnStmt";
         case AST_EXPR_STMT: return "ExprStmt";

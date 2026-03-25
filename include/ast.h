@@ -66,7 +66,6 @@ typedef enum {
     // Statements
     AST_BLOCK,
     AST_IF_STMT,
-    AST_WHILE_STMT,
     AST_FOR_STMT,
     AST_RETURN_STMT,
     AST_EXPR_STMT,
@@ -213,13 +212,6 @@ typedef struct ASTIfStmt {
     ASTNode *else_branch;   // Can be NULL, block, or if statement
 } ASTIfStmt;
 
-// While loop
-typedef struct ASTWhileStmt {
-    AST_NODE_FIELDS;
-    ASTNode *condition;
-    ASTNode *body;
-} ASTWhileStmt;
-
 // For loop
 typedef struct ASTForStmt {
     AST_NODE_FIELDS;
@@ -326,7 +318,6 @@ typedef void (*ASTVisitFunction)(ASTFunction *func, void *data);
 typedef void (*ASTVisitVariableDecl)(ASTVariableDecl *decl, void *data);
 typedef void (*ASTVisitBlock)(ASTBlock *block, void *data);
 typedef void (*ASTVisitIfStmt)(ASTIfStmt *if_stmt, void *data);
-typedef void (*ASTVisitWhileStmt)(ASTWhileStmt *while_stmt, void *data);
 typedef void (*ASTVisitForStmt)(ASTForStmt *for_stmt, void *data);
 typedef void (*ASTVisitReturnStmt)(ASTReturnStmt *ret, void *data);
 typedef void (*ASTVisitExprStmt)(ASTExprStmt *expr_stmt, void *data);
@@ -349,7 +340,6 @@ typedef struct ASTVisitor {
     ASTVisitVariableDecl visit_variable_decl;
     ASTVisitBlock visit_block;
     ASTVisitIfStmt visit_if_stmt;
-    ASTVisitWhileStmt visit_while_stmt;
     ASTVisitForStmt visit_for_stmt;
     ASTVisitReturnStmt visit_return_stmt;
     ASTVisitExprStmt visit_expr_stmt;

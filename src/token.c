@@ -152,7 +152,6 @@ char* token_type_to_string(Token_Type type) {
         case TOKEN_FOREACH:     return "FOREACH";
         case TOKEN_FUNCTION:    return "FUNCTION";
         case TOKEN_FOR:         return "FOR";
-        case TOKEN_WHILE:       return "WHILE";
         case TOKEN_RETURN:      return "RETURN";
         case TOKEN_LET:         return "LET";
         case TOKEN_MUT:         return "MUT";
@@ -273,9 +272,7 @@ void handle_identifier_and_keyword(Token* tokens, int token_index, const char* i
         tokens[token_index].type = TOKEN_FOREACH;
     } else if (strcmp(tokens[token_index].value, "for") == 0) {
         tokens[token_index].type = TOKEN_FOR;
-    } else if (strcmp(tokens[token_index].value, "while") == 0) {
-        tokens[token_index].type = TOKEN_WHILE;
-    }else if (strcmp(tokens[token_index].value, "let") == 0) {
+    } else if (strcmp(tokens[token_index].value, "let") == 0) {
         tokens[token_index].type = TOKEN_LET;
     } else if (strcmp(tokens[token_index].value, "mut") == 0) {
         tokens[token_index].type = TOKEN_MUT;

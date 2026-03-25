@@ -40,7 +40,6 @@ typedef enum {
     TOKEN_FOREACH,      // Keyword foreach
     TOKEN_FUNCTION,     // Keyword function
     TOKEN_FOR,          // Keyword for
-    TOKEN_WHILE,        // Keyword while
     TOKEN_RETURN,       // Keyword return
     TOKEN_LET,          // Keyword let
     TOKEN_MUT,          // Keyword mut
